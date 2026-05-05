@@ -1,0 +1,44 @@
+import nltk 
+from nltk.tokenize import word_tokenize 
+from nltk.corpus import stopwords 
+from nltk.stem import PorterStemmer 
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('punkt_tab')  
+print("NLTK setup complete.\n") 
+text = "Artificial intelligence is transforming the world rapidly. Companies are investing heavily in deep learning models. Researchers are developing advanced algorithms every day." 
+print("Original Text:") 
+print(text) 
+print("-" * 60) 
+
+tokens = word_tokenize(text.lower()) 
+print("1. Tokenization (word_tokenize + lowercase):") 
+ 
+print(tokens) 
+print("-" * 60) 
+is_ascii = all(ord(char) < 128 for char in text) 
+print("2. Script Validation (ASCII/English script check):") 
+print(f"Is the text in ASCII? \u2192 {is_ascii}") 
+if is_ascii: 
+    print("\u2713 Valid English/ASCII script.") 
+else: 
+    print("\u2718 Contains non-ASCII characters (possibly another script/language).") 
+print("-" * 60) 
+stop_words = set(stopwords.words('english')) 
+  
+filtered_tokens = [word for word in tokens if word.isalpha() and word not in stop_words] 
+  
+print("3. After Stop Word Removal (and removing punctuation/numbers):") 
+print(filtered_tokens) 
+ 
+stemmer = PorterStemmer() 
+stemmed_tokens = [stemmer.stem(word) for word in filtered_tokens] 
+  
+print("4. After Stemming (Porter Stemmer):") 
+print(stemmed_tokens) 
+print("-" * 60) 
+  
+print("Final Preprocessed Tokens:") 
+print(stemmed_tokens) 
+  
+print("\nPreprocessing pipeline completed successfully!")
