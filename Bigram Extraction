@@ -1,0 +1,35 @@
+import re 
+import nltk 
+from nltk.tokenize import word_tokenize 
+from collections import Counter 
+ 
+nltk.download('punkt') 
+ 
+def extract_bigrams(text): 
+    text = text.lower() 
+    tokens = word_tokenize(text) 
+    bigrams = list(nltk.bigrams(tokens)) 
+    bigram_freq = Counter(bigrams) 
+    return bigrams, bigram_freq 
+ 
+sample_text = """Natural language processing (NLP) is a fascinating field. 
+It allows computers to understand human language and extract insights.""" 
+ 
+bigrams, bigram_freq = extract_bigrams(sample_text) 
+ 
+print("Bigrams:\n", bigrams) 
+print("\nBigram Frequencies:\n", bigram_freq) 
+ 
+def is_valid_email(email): 
+    email_pattern = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}$' 
+    return bool(re.fullmatch(email_pattern, email)) 
+ 
+test_email = "example.user@mail.com" 
+print("\nEmail:", test_email, "Valid?" , is_valid_email(test_email)) 
+ 
+def is_valid_password(password): 
+    pwd_pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Zaz\d@$!%*?&]{8,}$' 
+    return bool(re.fullmatch(pwd_pattern, password)) 
+ 
+test_password = "StrongP@ssw0rd" 
+print("Password:", test_password, "Valid?" , is_valid_password(test_password))
