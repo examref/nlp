@@ -1,0 +1,51 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+sentences = [
+    "i love ai",
+    "i love ml",
+    "ai is powerful",
+    "ml is fun"]
+words = list(set(" ".join(sentences).split()))
+word_to_ix = {word: i for i, word in enumerate(words)}
+ix_to_word = {i: word for word, i in word_to_ix.items()}
+vocab_size = len(words)
+data = []
+for sentence in sentences:
+    w = sentence.split()
+    for i in range(len(w)-1):
+        data.append((word_to_ix[w[i]], word_to_ix[w[i+1]]))
+class RNNLM(nn.Module):
+    def __init__(self):
+        super(RNNLM, self).__init__()
+        self.embed = nn.Embedding(vocab_size, 8)
+        self.rnn = nn.RNN(8, 16, batch_first=True)
+        self.fc = nn.Linear(16, vocab_size)
+    def forward(self, x):
+        x = self.embed(x)
+        out, _ = self.rnn(x)
+        out = self.fc(out[:, -1, :])
+        return out
+model = RNNLM()
+loss_fn = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.01)
+for epoch in range(200):
+    total_loss = 0
+    for inp, target in data:
+        x = torch.tensor([[inp]])
+        y = torch.tensor([target])
+        optimizer.zero_grad()
+        output = model(x)
+        loss = loss_fn(output, y)
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item()
+    if epoch % 50 == 0:
+        print(f"Epoch {epoch}, Loss: {total_loss:.4f}")
+def predict(word):
+    x = torch.tensor([[word_to_ix[word]]])
+    output = model(x)
+    predicted = torch.argmax(output).item()
+    return ix_to_word[predicted]
+print("Next word after 'i'  :", predict("i"))
+print("Next word after 'ai' :", predict("ai"))
