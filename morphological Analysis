@@ -1,0 +1,20 @@
+words = ["unhappiness", "running", "disagree"] 
+prefixes = ['un', 'dis', 're'] 
+suffixes = ['ness', 'ing', 'ed', 'ly'] 
+def analyze(word): 
+    prefix = '' 
+    suffix = '' 
+    root = word 
+    for p in prefixes: 
+        if word.startswith(p): 
+            prefix = p 
+            root = word[len(p):] 
+            break 
+    for s in suffixes: 
+        if root.endswith(s): 
+            suffix = s 
+            root = root[:-len(s)] 
+            break 
+    return {'prefix': prefix, 'root': root, 'suffix': suffix}  
+for w in words: 
+    print(w, analyze(w))
