@@ -1,0 +1,68 @@
+import numpy as np 
+import matplotlib.pyplot as plt 
+import tensorflow as tf 
+from sklearn.datasets import fetch_lfw_people 
+from sklearn.model_selection import train_test_split 
+from tensorflow.keras.utils import to_categorical 
+
+faces = fetch_lfw_people(min_faces_per_person=50, resize=0.5, color=True) 
+X = faces.images
+y = faces.target
+names = faces.target_names 
+print("Total subjects:", len(names)) 
+print("Image shape:", X.shape) 
+  
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, 
+random_state=42) 
+  
+X_train = X_train / 255.0 
+X_val = X_val / 255.0 
+  
+y_train = to_categorical(y_train) 
+y_val = to_categorical(y_val) 
+  
+model = tf.keras.models.Sequential([ 
+    tf.keras.layers.Conv2D(32, (3,3), activation='relu', 
+input_shape=X_train.shape[1:]), 
+    tf.keras.layers.MaxPooling2D(2,2), 
+     
+    tf.keras.layers.Conv2D(64, (3,3), activation='relu'), 
+    tf.keras.layers.MaxPooling2D(2,2), 
+     
+    tf.keras.layers.Flatten(), 
+    tf.keras.layers.Dense(128, activation='relu'), 
+    tf.keras.layers.Dropout(0.4), 
+    tf.keras.layers.Dense(len(names), activation='softmax') 
+]) 
+  
+model.compile( 
+    optimizer='adam', 
+    loss='categorical_crossentropy', 
+    metrics=['accuracy'] 
+) 
+  
+model.summary() 
+  
+history = model.fit( 
+    X_train, y_train, 
+    epochs=20, 
+    batch_size=32, 
+    validation_data=(X_val, y_val) 
+) 
+  
+plt.plot(history.history['accuracy'], label='train_acc') 
+plt.plot(history.history['val_accuracy'], label='val_acc') 
+plt.legend() 
+plt.title("Accuracy on CNN") 
+plt.show() 
+  
+import random 
+idx = random.randint(0, len(X_val)-1) 
+sample_image = X_val[idx:idx+1] 
+pred = model.predict(sample_image) 
+pred_label = np.argmax(pred) 
+print("Predicted person:", names[pred_label]) 
+  
+plt.imshow(sample_image[0]) 
+plt.title(f"Predicted: {names[pred_label]}") 
+plt.axis('off')
