@@ -1,0 +1,47 @@
+import numpy as np
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Embedding, LSTM, SpatialDropout1D
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+max_features = 10000
+maxlen = 200
+batch_size = 32
+embedding_dims = 128
+lstm_units = 64
+
+(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=max_features)
+x_train = pad_sequences(x_train, maxlen=maxlen)
+x_test = pad_sequences(x_test, maxlen=maxlen)
+model = Sequential([
+    Embedding(max_features, embedding_dims, input_length=maxlen),
+    SpatialDropout1D(0.2),
+    LSTM(lstm_units, dropout=0.2, recurrent_dropout=0.2),
+    Dense(1, activation='sigmoid')
+])
+model.compile(loss='binary_crossentropy',
+              optimizer='adam',
+              metrics=['accuracy'])
+model.fit(x_train, y_train,
+          batch_size=batch_size,
+          epochs=3,
+          validation_data=(x_test, y_test))
+word_index = imdb.get_word_index()
+def predict_sentiment(sentence):
+    words = sentence.lower().split()
+    test_seq = []
+    for word in words:
+        if word in word_index and word_index[word] + 3 < max_features:
+            test_seq.append(word_index[word] + 3)
+        else:
+            test_seq.append(2)
+    padded_seq = pad_sequences([test_seq], maxlen=maxlen)
+    prediction = model.predict(padded_seq, verbose=0)
+    score = prediction[0][0]
+    sentiment = "POSITIVE" if score > 0.5 else "NEGATIVE"
+    confidence = score if score > 0.5 else 1 - score
+    print("-" * 30)
+    print(f"Review: '{sentence}'")
+    print(f"Result: {sentiment} (Confidence: {confidence*100:.2f}%)")
+predict_sentiment("This was a fantastic movie with a brilliant plot.")
+predict_sentiment("The acting was terrible and I hated the ending.")
+predict_sentiment("It was an okay experience, but a bit too long.")
